@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\Products;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\Update;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
 
+    /**
+     * Summary of index
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     */
     public function index()
     {
         $products = Product::all()->load('category');
@@ -24,7 +30,19 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->all();
+        $validator = Validator::make($request->all(),[
+            'name'             => 'required|string|max:255|unique:products,name',
+            'description'      => 'required|string|max:255',
+            'price'            =>'required|numeric|min:1',
+            'stock'            =>'required|integer|min:1',
+            'category_id'      =>'required|integer|exists:categories,id',
+            'discount'         =>'nullable|numeric|max:100'
+        ]);
+        if ($validator->fails())
+            return response($validator->errors());
+        $data = $validator->validated();
+        if(isset($data['discount']))
+            $data['is_discount'] = true;
         Product::create($data);
         return redirect()->route('product.index');
     }
@@ -42,7 +60,7 @@ class ProductController extends Controller
         return view('ProductUpdate', compact(['product', 'categories']));
     }
 
-    public function update(Request $request, $id)
+    public function update(Update $request, $id)
     {
         $product = Product::find($id);
         $data = $request->all();

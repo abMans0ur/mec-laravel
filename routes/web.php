@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Products\ProductController;
 use App\Http\Controllers\TestController;
 use App\Models\Product;
@@ -16,6 +17,15 @@ Route::prefix('products')->group(function () {
     Route::put('{id}', [ProductController::class,'update'])->name('product.update');
     Route::get('{id}', [ProductController::class, 'show']);
     Route::delete('{id}', [ProductController::class, 'delete'])->name('product.delete');
+});
+Route::prefix('category')->group(function () {
+    Route::get('', [CategoryController::class, 'index'])->name('category.index');
+    Route::get('create', [CategoryController::class, 'create'])->name('category.create');
+    Route::post('', [CategoryController::class, 'store'])->name('category.store');
+    Route::get('edit/{id}', [CategoryController::class, 'edit'])->name('category.edit');
+    Route::put('{id}', [CategoryController::class, 'update'])->name('category.update');
+    Route::get('{id}', [CategoryController::class, 'show']);
+    Route::delete('{id}', [CategoryController::class, 'destroy'])->name('category.delete');
 });
 
 // Route::get('/products', [TestController::class,'index']);
