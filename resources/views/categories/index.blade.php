@@ -1,3 +1,4 @@
+<a href="{{route('logout')}}">Logout</a>
 <a href="{{route('category.create')}}">Add Category</a>
 <a href="{{route('product.index')}}">Show Products</a>
 <table border="1" width='100%'>
