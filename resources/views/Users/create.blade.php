@@ -1,5 +1,7 @@
+@extends('MainView')
+@section('content')
 <a href="{{ route('user.index') }}">Home</a>
-<form action="{{ route('user.store') }}" method="post">
+<form action="{{ route('user.store') }}" method="post" enctype="multipart/form-data">
     @csrf
     <input type="text" placeholder="name" name="name">
     <input type="email" placeholder="email" name="email">
@@ -11,5 +13,7 @@
         <option value="client">Client</option>
         <option value="merchant">Merchant</option>
     </select>
+    <input type="file" name="image" id="">
     <button type="submit">Add User</button>
 </form>
+@endsection

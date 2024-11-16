@@ -17,9 +17,6 @@ class isAdmin
     public function handle(Request $request, Closure $next): Response
     {
 
-        if (Auth::user()->category == 'admin')
-            return $next($request);
-        else
-            return redirect('login');
+        return Auth::user()->category === 'admin' ? $next($request) : redirect('login');
     }
 }

@@ -1,3 +1,7 @@
+@extends('MainView')
+{{-- @content --}}
+@section('content')
+    
 <div>
     <a href="{{route('product.create')}}">Add Product</a>
     <a href="{{route('category.index')}}">Show Categorise</a>
@@ -11,7 +15,7 @@
             <th>Stock</th>
             <th colspan="2">Actions</th>
         </tr>
-        @foreach ($products as $item):
+        @foreach ($products as $item)
         <tr>
             <td>{{$item->id}}</td>
             <td>{{$item->name}}</td>
@@ -43,3 +47,4 @@
         @endforeach
     </table>
 </div>
+@endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Products;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\Update;
+use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all()->load('category');
+        // return response()->json(ProductResource::collection($products));
         return view('ProductsTable', compact('products'));
     }
 
