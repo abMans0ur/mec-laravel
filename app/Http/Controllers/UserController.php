@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
@@ -16,14 +17,14 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $order=$request->order;
+        $order = $request->order;
         $users = User::query()->orderBy('updated_at', $order)->get();
         return response()->json([
             "success" => true,
             "data" => [
-                "client_count" => $users->where('category','client')->count(),
-                "admin_count" => $users->where('category','admin')->count(),
-                "merchant" => $users->where('category','merchant')->count(),
+                "client_count" => $users->where('category', 'client')->count(),
+                "admin_count" => $users->where('category', 'admin')->count(),
+                "merchant" => $users->where('category', 'merchant')->count(),
                 "users" => $users
             ]
         ], 200);
@@ -52,12 +53,12 @@ class UserController extends Controller
             'image'     => 'nullable|image',
             'password'  => [
                 'required',
-                'confirmed',
-                Password::min(8)->letters()
-                    ->mixedCase()  //upper and lower case
-                    ->numbers()     //number 
-                    ->symbols()     //!@#$%^&*()
-                    ->uncompromised(),
+                // 'confirmed',
+                // Password::min(8)->letters()
+                //     ->mixedCase()  //upper and lower case
+                //     ->numbers()     //number 
+                //     ->symbols()     //!@#$%^&*()
+                //     ->uncompromised(),
             ]
             // regex
         ]);
@@ -74,7 +75,13 @@ class UserController extends Controller
             $data['avatar'] = null; // Default value if no image is uploaded
         }
         // dd($data);
-        User::create($data);
+        $user = User::create($data);
+        $token = $user->createToken($user->name);
+        return response()->json([
+            'user'  => $user,
+            'token' => $token->plainTextToken
+        ]);
+
         return redirect()->route('user.index');
     }
 
@@ -140,12 +147,31 @@ class UserController extends Controller
         $data = $validator->validated();
         $user = User::query()->where('email', $data['email'])->first();
         if (Hash::check($data['password'], $user->password)) {
-            if (Auth::attempt($data)) {
-                $request->session()->regenerate();
-
-                return $user->category == 'client' ? redirect()->route('category.index') : redirect()->route('user.index');
-                // return redirect()->intended('dashboard');
+            $personalToken = PersonalAccessToken::query()
+                ->where('tokenable_id', $user->id)
+                ->where('name', "user - " . $user->name . "- phone - " . $user->phone)
+                ->first();
+            if ($personalToken) {
+                $personalToken->delete();
             }
+
+            $token = $user->createToken(
+                "user - " . $user->name . "- phone - " . $user->phone,
+                ["*"]
+                // ,now()->addMinutes(1)
+            );
+            return response()->json([
+                'success' => true,
+                'user'  => $user,
+                // 'token' => $token->plainTextToken
+                'token' => $token->accessToken
+            ]);
+            // if (Auth::attempt($data)) {
+            //     $request->session()->regenerate();
+
+            //     return $user->category == 'client' ? redirect()->route('category.index') : redirect()->route('user.index');
+            //     // return redirect()->intended('dashboard');
+            // }
         } else {
             return 'WRONG PASSWORD!!!';
         }

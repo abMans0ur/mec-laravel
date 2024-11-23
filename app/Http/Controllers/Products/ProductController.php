@@ -20,8 +20,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all()->load('category');
-        // return response()->json(ProductResource::collection($products));
-        return view('ProductsTable', compact('products'));
+        return response()->json(["success"=>true,"data"=>ProductResource::collection($products)]);
+        // return view('ProductsTable', compact('products'));
     }
 
     public function create()
@@ -52,7 +52,10 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::find($id);
-        return $product;
+        return response()->json([
+            'success'=>true,
+            'data'=>ProductResource::make($product)
+        ]);
     }
 
     public function edit($id)
